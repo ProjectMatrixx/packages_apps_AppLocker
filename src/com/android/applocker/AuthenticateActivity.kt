@@ -2,6 +2,7 @@ package com.android.applocker
 
 import android.app.Activity
 import android.app.AxSandboxManager
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.hardware.biometrics.BiometricPrompt
@@ -239,19 +240,28 @@ class AuthenticateActivity : ComponentActivity() {
     }
 
     private fun setupWindowForOverlay() {
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
+
         window?.apply {
             addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+            setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE or
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
             )
             attributes = attributes?.apply {
                 privateFlags = privateFlags or
                     WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
             }
         }
+
+        val km = getSystemService(KeyguardManager::class.java)
+        km?.requestDismissKeyguard(this, null)
     }
 
     private fun buildResultData(): Intent = Intent().apply {
